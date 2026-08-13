@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>คิดค่าแรง แผนกคัดผัก</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  :root {
+    --bg: #F3F4EA;
+    --surface: #FFFFFF;
+    --primary: #33603C;
+    --primary-dark: #264A2E;
+    --primary-tint: #DFEAD9;
+    --accent: #D9A62E;
+    --accent-tint: #F8ECCB;
+    --text: #232821;
+    --text-secondary: #5E6456;
+    --border: #DEE2D2;
+    --danger: #B3402D;
+    --danger-tint: #F5DFD9;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans Thai', sans-serif;
+  }
+  #app { max-width: 980px; margin: 0 auto; padding: 24px 16px 60px; }
+  .header-row { display: flex; align-items: center; gap: 12px; }
+  .logo-box { width: 44px; height: 44px; border-radius: 12px; background: var(--primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .app-title { font-family: 'Kanit', sans-serif; font-weight: 700; font-size: 20px; color: var(--primary-dark); }
+  .app-subtitle { font-size: 13px; color: var(--text-secondary); }
+  .live-badge { font-size: 12px; color: var(--primary-dark); font-weight: 500; margin-top: 4px; display: inline-flex; align-items: center; gap: 5px; background: var(--primary-tint); padding: 3px 10px; border-radius: 999px; }
+  .leaf-divider { display: flex; gap: 4px; margin: 16px 0 20px; opacity: 0.5; }
+  .leaf-tick { width: 8px; height: 3px; border-radius: 2px; background: var(--primary); }
+  .leaf-tick.accent { background: var(--accent); }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .vp-tab { border: none; background: transparent; font-family: 'Kanit', sans-serif; font-weight: 500; font-size: 14px; padding: 10px 18px; border-radius: 999px; cursor: pointer; color: var(--text-secondary); display: inline-flex; align-items: center; gap: 6px; }
+  .vp-tab.active { background: var(--primary); color: #fff; }
+  .vp-tab svg { width: 16px; height: 16px; }
+  .content { padding-top: 20px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  .card-title { font-family: 'Kanit', sans-serif; font-weight: 600; font-size: 15px; margin-bottom: 10px; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+  .stat-card.highlight { background: var(--primary-tint); border-color: var(--primary); }
+  .stat-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
+  .stat-label.dark { color: var(--primary-dark); display: flex; align-items: center; gap: 4px; }
+  .stat-label svg { width: 14px; height: 14px; }
+  .stat-value { font-family: 'Kanit', sans-serif; font-size: 24px; font-weight: 600; }
+  .stat-value.dark { color: var(--primary-dark); font-weight: 700; }
+  .empty-note { color: var(--text-secondary); font-size: 14px; padding: 12px 0; }
+  table.vp-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  table.vp-table th { text-align: left; font-family: 'Noto Sans Thai', sans-serif; font-weight: 600; font-size: 12px; color: var(--text-secondary); padding: 8px 10px; border-bottom: 1.5px solid var(--border); }
+  table.vp-table td { padding: 10px; border-bottom: 1px solid var(--border); }
+  table.vp-table tr:last-child td { border-bottom: none; }
+  .table-wrap { overflow-x: auto; }
+  .vp-input { font-family: 'Noto Sans Thai', sans-serif; border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 14px; outline: none; background: #fff; color: var(--text); }
+  .vp-input:focus { border-color: var(--primary); }
+  .vp-btn-primary { background: var(--primary); color: #fff; border: none; border-radius: 8px; padding: 9px 16px; font-family: 'Noto Sans Thai', sans-serif; font-weight: 600; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+  .vp-btn-primary:hover { background: var(--primary-dark); }
+  .vp-btn-primary:disabled { background: var(--border); color: var(--text-secondary); cursor: not-allowed; }
+  .vp-btn-ghost { background: transparent; border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-family: 'Noto Sans Thai', sans-serif; font-size: 14px; cursor: pointer; color: var(--text-secondary); display: inline-flex; align-items: center; gap: 6px; }
+  .vp-btn-ghost:hover { background: var(--primary-tint); color: var(--primary-dark); border-color: var(--primary); }
+  .vp-btn-ghost.on-surface { background: #fff; }
+  .vp-icon-btn { background: transparent; border: none; cursor: pointer; padding: 6px; border-radius: 6px; display: inline-flex; }
+  .vp-icon-btn:hover { background: var(--primary-tint); }
+  .vp-icon-btn.danger:hover { background: var(--danger-tint); }
+  .vp-icon-btn svg, .vp-btn-primary svg, .vp-btn-ghost svg { width: 15px; height: 15px; }
+  .vp-range { border: 1px solid var(--border); background: transparent; font-family: 'Noto Sans Thai', sans-serif; font-size: 13px; padding: 6px 14px; border-radius: 999px; cursor: pointer; color: var(--text-secondary); }
+  .vp-range.active { background: var(--accent-tint); color: #7A5A0C; border-color: var(--accent); font-weight: 600; }
+  .row-between { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .filter-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .filter-row svg { width: 16px; height: 16px; color: var(--text-secondary); }
+  .emp-row { display: flex; align-items: center; justify-content: space-between; border: 1px dashed var(--border); border-radius: 10px; padding: 10px 14px; background: var(--bg); }
+  .emp-list { display: flex; flex-direction: column; gap: 8px; }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--primary-tint); display: flex; align-items: center; justify-content: center; font-family: 'Kanit', sans-serif; font-weight: 600; color: var(--primary-dark); font-size: 14px; flex-shrink: 0; }
+  .badge-status { display: inline-flex; align-items: center; gap: 5px; background: var(--accent-tint); color: #7A5A0C; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; }
+  .badge-status.paid { background: var(--primary-tint); color: var(--primary-dark); padding: 5px 12px; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: #3B9146; display: inline-block; }
+  .dot.big { width: 8px; height: 8px; }
+  .dot.idle { background: var(--border); }
+  .chip { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 999px; font-family: 'Noto Sans Thai', sans-serif; font-size: 14px; cursor: pointer; border: 1px solid var(--border); background: #fff; color: var(--text); }
+  .chip.selected { border-color: var(--primary); background: var(--primary); color: #fff; font-weight: 600; }
+  .chip svg { width: 14px; height: 14px; }
+  .active-shift-row { display: flex; align-items: center; justify-content: space-between; background: #fff; border: 1px solid var(--primary); border-radius: 10px; padding: 9px 14px; }
+  .form-inline { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .loading { min-height: 400px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); }
+  .tabular { font-variant-numeric: tabular-nums; }
+  .actual-paid-input { width: 100px; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- storage ---------- */
+  var STORAGE_EMPLOYEES = "veggie-payroll:employees";
+  var STORAGE_ENTRIES = "veggie-payroll:entries";
+
+  function loadJSON(key, fallback) {
+    try {
+      var raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch (e) {
+      return fallback;
+    }
+  }
+  function saveJSON(key, value) {
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {}
+  }
+
+  /* ---------- state ---------- */
+  var state = {
+    employees: loadJSON(STORAGE_EMPLOYEES, []),
+    entries: loadJSON(STORAGE_ENTRIES, []),
+    tab: "dashboard",
+    range: "today",
+    payFilter: "unpaid",
+    payRange: "all",
+    editingId: null,
+    clockEmpIds: [],
+    actualPaidDrafts: {}
+  };
+
+  function saveEmployees(list) { state.employees = list; saveJSON(STORAGE_EMPLOYEES, list); render(); }
+  function saveEntries(list) { state.entries = list; saveJSON(STORAGE_ENTRIES, list); render(); }
+
+  /* ---------- helpers ---------- */
+  function uid(prefix) {
+    return prefix + "-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
+  }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function calcHours(timeIn, timeOut) {
+    if (!timeIn || !timeOut) return 0;
+    var a = timeIn.split(":").map(Number), b = timeOut.split(":").map(Number);
+    var diff = (b[0] * 60 + b[1]) - (a[0] * 60 + a[1]);
+    if (diff <= 0) diff += 24 * 60;
+    return diff / 60;
+  }
+  function elapsedHours(entry, now) {
+    var start = new Date(entry.date + "T" + entry.timeIn + ":00");
+    var diffMs = now - start;
+    if (diffMs < 0) diffMs = 0;
+    return diffMs / 3600000;
+  }
+  function elapsedFmt(hrs) {
+    var totalSec = Math.floor(hrs * 3600);
+    var h = Math.floor(totalSec / 3600);
+    var m = Math.floor((totalSec % 3600) / 60);
+    var s = totalSec % 60;
+    function pad(n) { return String(n).padStart(2, "0"); }
+    return pad(h) + ":" + pad(m) + ":" + pad(s);
+  }
+  function thb(n) {
+    return new Intl.NumberFormat("th-TH", { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(n) + " บาท";
+  }
+  function hrsFmt(n) {
+    return new Intl.NumberFormat("th-TH", { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(n) + " ชม.";
+  }
+  function todayStr() { return new Date().toISOString().slice(0, 10); }
+  function nowTimeStr() {
+    var d = new Date();
+    return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+  }
+  function thaiDateTime(date) {
+    var dateLabel = date.toLocaleDateString("th-TH", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+    var timeLabel = date.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+    return dateLabel + " · " + timeLabel + " น.";
+  }
+  function inRange(dateStr, range) {
+    if (range === "all") return true;
+    var d = new Date(dateStr + "T00:00:00");
+    var now = new Date();
+    if (range === "today") return dateStr === todayStr();
+    if (range === "week") {
+      var day = (now.getDay() + 6) % 7;
+      var monday = new Date(now);
+      monday.setDate(now.getDate() - day);
+      monday.setHours(0, 0, 0, 0);
+      return d >= monday && d <= now;
+    }
+    if (range === "month") {
+      var first = new Date(now.getFullYear(), now.getMonth(), 1);
+      return d >= first && d <= now;
+    }
+    return true;
+  }
+  function empMap() {
+    var m = {};
+    state.employees.forEach(function (e) { m[e.id] = e; });
+    return m;
+  }
+  function icon(name, extra) {
+    return '<i data-lucide="' + name + '"' + (extra ? ' ' + extra : '') + '></i>';
+  }
+
+  /* ---------- actions ---------- */
+  function addEmployee() {
+    var nameEl = document.getElementById("new-emp-name");
+    var rateEl = document.getElementById("new-emp-rate");
+    var name = nameEl.value.trim();
+    var rate = parseFloat(rateEl.value);
+    if (!name || !rate || rate <= 0) return;
+    saveEmployees(state.employees.concat([{ id: uid("emp"), name: name, rate: rate }]));
+  }
+  function deleteEmployee(id) {
+    saveEmployees(state.employees.filter(function (e) { return e.id !== id; }));
+  }
+  function startEdit(id) { state.editingId = id; render(); }
+  function cancelEdit() { state.editingId = null; render(); }
+  function confirmEdit(id) {
+    var input = document.getElementById("edit-rate-" + id);
+    var rate = parseFloat(input.value);
+    if (!rate || rate <= 0) return;
+    state.editingId = null;
+    saveEmployees(state.employees.map(function (e) { return e.id === id ? Object.assign({}, e, { rate: rate }) : e; }));
+  }
+  function addEntry() {
+    var empEl = document.getElementById("entry-emp");
+    var dateEl = document.getElementById("entry-date");
+    var inEl = document.getElementById("entry-in");
+    var outEl = document.getElementById("entry-out");
+    if (!empEl.value || !dateEl.value || !inEl.value) return;
+    saveEntries(state.entries.concat([{
+      id: uid("ent"), employeeId: empEl.value, date: dateEl.value,
+      timeIn: inEl.value, timeOut: outEl.value || "", paid: false
+    }]));
+  }
+  function deleteEntry(id) {
+    saveEntries(state.entries.filter(function (e) { return e.id !== id; }));
+  }
+  function toggleClockEmp(id) {
+    var idx = state.clockEmpIds.indexOf(id);
+    if (idx === -1) state.clockEmpIds.push(id); else state.clockEmpIds.splice(idx, 1);
+    render();
+  }
+  function clockIn() {
+    var ids = state.clockEmpIds.filter(Boolean);
+    if (ids.length === 0) return;
+    var t = nowTimeStr(), d = todayStr();
+    var newEntries = ids.map(function (employeeId) {
+      return { id: uid("ent"), employeeId: employeeId, date: d, timeIn: t, timeOut: "", paid: false };
+    });
+    state.clockEmpIds = [];
+    saveEntries(state.entries.concat(newEntries));
+  }
+  function clockOut(id) {
+    var t = nowTimeStr();
+    saveEntries(state.entries.map(function (e) { return e.id === id ? Object.assign({}, e, { timeOut: t }) : e; }));
+  }
+  function clockOutAll() {
+    var t = nowTimeStr();
+    saveEntries(state.entries.map(function (e) { return !e.timeOut ? Object.assign({}, e, { timeOut: t }) : e; }));
+  }
+  function markPaid(id, amount) {
+    saveEntries(state.entries.map(function (e) { return e.id === id ? Object.assign({}, e, { paid: true, actualPaid: amount }) : e; }));
+  }
+
+  /* ---------- derived ---------- */
+  function getSortedEntries() {
+    return state.entries.slice().sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
+  }
+  function getActiveEntries() { return state.entries.filter(function (e) { return !e.timeOut; }); }
+  function getClockableEmployees() {
+    var activeIds = {};
+    getActiveEntries().forEach(function (e) { activeIds[e.employeeId] = true; });
+    return state.employees.filter(function (e) { return !activeIds[e.id]; });
+  }
+  function getCompletedEntries() { return getSortedEntries().filter(function (e) { return e.timeOut; }); }
+  function getPaymentEntries() {
+    var completed = getCompletedEntries().filter(function (e) { return inRange(e.date, state.payRange); });
+    if (state.payFilter === "unpaid") return completed.filter(function (e) { return !e.paid; });
+    if (state.payFilter === "paid") return completed.filter(function (e) { return e.paid; });
+    return completed;
+  }
+  function getUnpaidTotal(em) {
+    return getCompletedEntries().filter(function (e) { return !e.paid && inRange(e.date, state.payRange); }).reduce(function (sum, e) {
+      var emp = em[e.employeeId];
+      var hrs = calcHours(e.timeIn, e.timeOut);
+      return sum + (emp ? hrs * emp.rate : 0);
+    }, 0);
+  }
+  function getActualPaidTotal() {
+    return getCompletedEntries().filter(function (e) { return e.paid && inRange(e.date, state.payRange); }).reduce(function (sum, e) {
+      return sum + (Number(e.actualPaid) || 0);
+    }, 0);
+  }
+  function getDashboardSummary(em, range) {
+    var filtered = getSortedEntries().filter(function (e) { return inRange(e.date, range); });
+    var byEmp = {}, totalHours = 0, totalWage = 0, shiftCount = 0;
+    filtered.forEach(function (e) {
+      if (!e.timeOut) return;
+      var emp = em[e.employeeId];
+      var hrs = calcHours(e.timeIn, e.timeOut);
+      var wage = emp ? hrs * emp.rate : 0;
+      totalHours += hrs; totalWage += wage; shiftCount += 1;
+      if (!byEmp[e.employeeId]) byEmp[e.employeeId] = { name: emp ? emp.name : "พนักงานที่ถูกลบ", hours: 0, wage: 0, shifts: 0 };
+      byEmp[e.employeeId].hours += hrs;
+      byEmp[e.employeeId].wage += wage;
+      byEmp[e.employeeId].shifts += 1;
+    });
+    var rows = Object.keys(byEmp).map(function (k) { return byEmp[k]; }).sort(function (a, b) { return b.wage - a.wage; });
+    return { byEmp: rows, totalHours: totalHours, totalWage: totalWage, shiftCount: shiftCount };
+  }
+
+  /* ---------- render: dashboard ---------- */
+  function renderDashboard() {
+    var em = empMap();
+    var active = getActiveEntries();
+    var summary = getDashboardSummary(em, state.range);
+
+    var activeSection = '<div class="card" style="margin-bottom:20px;">' +
+      '<div class="row-between" style="justify-content:flex-start; margin-bottom:12px;">' +
+      '<span class="dot big ' + (active.length ? "" : "idle") + '"></span>' +
+      '<div class="card-title" style="margin-bottom:0;">พนักงานที่กำลังทำงานอยู่ตอนนี้</div>' +
+      '<span style="font-size:12px;color:var(--text-secondary);">(' + active.length + ' คน)</span>' +
+      '</div>';
+
+    if (active.length === 0) {
+      activeSection += '<div class="empty-note">ไม่มีพนักงานกำลังทำงานอยู่</div>';
+    } else {
+      activeSection += '<div class="table-wrap"><table class="vp-table"><thead><tr>' +
+        '<th>พนักงาน</th><th>สถานะ</th><th>เวลาเข้างาน</th><th>ทำงานมาแล้ว</th><th>ค่าแรงสะสม (เรียลไทม์)</th>' +
+        '</tr></thead><tbody>';
+      active.forEach(function (entry) {
+        var emp = em[entry.employeeId];
+        var startISO = entry.date + "T" + entry.timeIn + ":00";
+        activeSection += '<tr>' +
+          '<td style="font-weight:500;">' + (emp ? esc(emp.name) : "พนักงานถูกลบ") + '</td>' +
+          '<td><span class="badge-status"><span class="dot"></span> กำลังทำงาน</span></td>' +
+          '<td>' + entry.timeIn + ' น.</td>' +
+          '<td class="tabular js-elapsed" data-start="' + startISO + '"></td>' +
+          '<td style="font-weight:700;color:var(--primary-dark);" class="js-wage" data-start="' + startISO + '" data-rate="' + (emp ? emp.rate : 0) + '"></td>' +
+          '</tr>';
+      });
+      activeSection += '</tbody></table></div>';
+    }
+    activeSection += '</div>';
+
+    var ranges = [["today", "วันนี้"], ["week", "สัปดาห์นี้"], ["month", "เดือนนี้"], ["all", "ทั้งหมด"]];
+    var rangeHtml = '<div class="filter-row">' + icon("calendar-range") +
+      ranges.map(function (r) {
+        return '<button class="vp-range ' + (state.range === r[0] ? "active" : "") + '" data-action="set-range" data-range="' + r[0] + '">' + r[1] + '</button>';
+      }).join("") + '</div>';
+
+    var stats = '<div class="stat-grid">' +
+      '<div class="stat-card"><div class="stat-label">กะทำงานทั้งหมด</div><div class="stat-value">' + summary.shiftCount + ' กะ</div></div>' +
+      '<div class="stat-card"><div class="stat-label">ชั่วโมงรวม</div><div class="stat-value">' + hrsFmt(summary.totalHours) + '</div></div>' +
+      '<div class="stat-card highlight"><div class="stat-label dark">' + icon("wallet") + ' ค่าแรงรวม</div><div class="stat-value dark">' + thb(summary.totalWage) + '</div></div>' +
+      '</div>';
+
+    var table = '<div class="card"><div class="card-title">สรุปตามพนักงาน</div>';
+    if (summary.byEmp.length === 0) {
+      table += '<div class="empty-note">ยังไม่มีข้อมูลการทำงานในช่วงนี้</div>';
+    } else {
+      table += '<div class="table-wrap"><table class="vp-table"><thead><tr><th>ชื่อพนักงาน</th><th>จำนวนกะ</th><th>ชั่วโมงรวม</th><th>ค่าแรงรวม</th></tr></thead><tbody>';
+      summary.byEmp.forEach(function (row) {
+        table += '<tr><td style="font-weight:500;">' + esc(row.name) + '</td><td>' + row.shifts + '</td><td>' + hrsFmt(row.hours) + '</td><td style="font-weight:600;color:var(--primary-dark);">' + thb(row.wage) + '</td></tr>';
+      });
+      table += '</tbody></table></div>';
+    }
+    table += '</div>';
+
+    return activeSection + rangeHtml + stats + table;
+  }
+
+  /* ---------- render: employees ---------- */
+  function renderEmployees() {
+    var addForm = '<div class="card" style="margin-bottom:16px;">' +
+      '<div class="card-title">เพิ่มพนักงานใหม่</div>' +
+      '<div class="form-inline">' +
+      '<input class="vp-input" style="flex:2 1 160px;" id="new-emp-name" placeholder="ชื่อพนักงาน" />' +
+      '<input class="vp-input" style="flex:1 1 120px;" id="new-emp-rate" type="number" min="0" placeholder="ค่าแรง/ชม." />' +
+      '<button class="vp-btn-primary" data-action="add-employee">' + icon("plus") + ' เพิ่มพนักงาน</button>' +
+      '</div></div>';
+
+    var list = '<div class="card"><div class="card-title">รายชื่อพนักงาน (' + state.employees.length + ')</div>';
+    if (state.employees.length === 0) {
+      list += '<div class="empty-note">ยังไม่มีพนักงานในระบบ</div>';
+    } else {
+      list += '<div class="emp-list">';
+      state.employees.forEach(function (emp) {
+        var initial = esc(emp.name.charAt(0));
+        list += '<div class="emp-row">' +
+          '<div style="display:flex;align-items:center;gap:10px;">' +
+          '<div class="avatar">' + initial + '</div>' +
+          '<div style="font-weight:500;">' + esc(emp.name) + '</div>' +
+          '</div><div style="display:flex;align-items:center;gap:8px;">';
+        if (state.editingId === emp.id) {
+          list += '<input class="vp-input" style="width:90px;" type="number" id="edit-rate-' + emp.id + '" value="' + emp.rate + '" />' +
+            '<span style="font-size:13px;color:var(--text-secondary);">บาท/ชม.</span>' +
+            '<button class="vp-icon-btn" data-action="confirm-edit" data-id="' + emp.id + '">' + icon("check", 'style="color:var(--primary)"') + '</button>' +
+            '<button class="vp-icon-btn" data-action="cancel-edit">' + icon("x", 'style="color:var(--text-secondary)"') + '</button>';
+        } else {
+          list += '<span style="font-size:13px;color:var(--text-secondary);">' + thb(emp.rate) + '/ชม.</span>' +
+            '<button class="vp-icon-btn" data-action="edit-employee" data-id="' + emp.id + '">' + icon("pencil", 'style="color:var(--text-secondary)"') + '</button>' +
+            '<button class="vp-icon-btn danger" data-action="delete-employee" data-id="' + emp.id + '">' + icon("trash-2", 'style="color:var(--danger)"') + '</button>';
+        }
+        list += '</div></div>';
+      });
+      list += '</div>';
+    }
+    list += '</div>';
+    return addForm + list;
+  }
+
+  /* ---------- render: entries ---------- */
+  function renderEntries() {
+    var active = getActiveEntries();
+    var clockable = getClockableEmployees();
+    var em = empMap();
+
+    var clockCard = '<div class="card" style="background:var(--primary-tint); border-color:var(--primary); margin-bottom:16px;">' +
+      '<div class="row-between" style="margin-bottom:4px;">' +
+      '<div class="card-title" style="margin-bottom:0;color:var(--primary-dark);">เริ่มงาน / เลิกงาน</div>';
+    if (active.length > 0) {
+      clockCard += '<button class="vp-btn-ghost on-surface" data-action="clock-out-all">' + icon("square") + ' เลิกงานทุกคน</button>';
+    }
+    clockCard += '</div>' +
+      '<div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">กดปุ่มเพื่อบันทึกวันที่และเวลาปัจจุบันทันที (<span id="live-clock-entries"></span>)</div>';
+
+    if (state.employees.length === 0) {
+      clockCard += '<div class="empty-note">กรุณาเพิ่มพนักงานก่อน</div>';
+    } else {
+      if (clockable.length === 0) {
+        clockCard += '<div class="empty-note" style="padding:0;margin-bottom:' + (active.length ? "14px" : "0") + ';">พนักงานทุกคนกำลังทำงานอยู่แล้ว</div>';
+      } else {
+        clockCard += '<div style="margin-bottom:' + (active.length ? "14px" : "0") + ';">' +
+          '<div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">เลือกพนักงานที่จะเริ่มงาน (เลือกได้มากกว่า 1 คน)</div>' +
+          '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">';
+        clockable.forEach(function (emp) {
+          var selected = state.clockEmpIds.indexOf(emp.id) !== -1;
+          clockCard += '<button type="button" class="chip ' + (selected ? "selected" : "") + '" data-action="toggle-clock-emp" data-id="' + emp.id + '">' +
+            (selected ? icon("check") : "") + esc(emp.name) + '</button>';
+        });
+        clockCard += '</div>' +
+          '<button class="vp-btn-primary" data-action="clock-in" ' + (state.clockEmpIds.length === 0 ? "disabled" : "") + '>' +
+          icon("play") + ' เริ่มงานตอนนี้' + (state.clockEmpIds.length > 0 ? " (" + state.clockEmpIds.length + " คน)" : "") + '</button>' +
+          '</div>';
+      }
+      if (active.length > 0) {
+        clockCard += '<div style="display:flex;flex-direction:column;gap:8px;">';
+        active.forEach(function (entry) {
+          var emp = em[entry.employeeId];
+          clockCard += '<div class="active-shift-row">' +
+            '<div style="font-size:14px;"><span style="font-weight:500;">' + (emp ? esc(emp.name) : "พนักงานถูกลบ") + '</span>' +
+            '<span style="color:var(--text-secondary);margin-left:8px;font-size:13px;">เข้างานเมื่อ ' + entry.timeIn + ' น.</span></div>' +
+            '<button class="vp-btn-ghost" data-action="clock-out" data-id="' + entry.id + '">' + icon("square") + ' เลิกงานตอนนี้</button>' +
+            '</div>';
+        });
+        clockCard += '</div>';
+      }
+    }
+    clockCard += '</div>';
+
+    var manualForm = '<div class="card" style="margin-bottom:16px;">' +
+      '<div class="card-title">บันทึกเวลาย้อนหลัง / ด้วยตนเอง</div>';
+    if (state.employees.length === 0) {
+      manualForm += '<div class="empty-note">กรุณาเพิ่มพนักงานก่อนบันทึกเวลาทำงาน</div>';
+    } else {
+      manualForm += '<div style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;">ถ้ายังไม่ทราบเวลาเลิกงาน สามารถเว้นช่อง "เวลาออกงาน" ว่างไว้ก่อนได้ รายการจะไปแสดงในช่องกำลังทำงาน แล้วค่อยกลับมากดเลิกงานทีหลัง</div>' +
+        '<div class="form-inline">' +
+        '<select class="vp-input" style="flex:1 1 160px;" id="entry-emp"><option value="">เลือกพนักงาน</option>' +
+        state.employees.map(function (emp) { return '<option value="' + emp.id + '">' + esc(emp.name) + '</option>'; }).join("") +
+        '</select>' +
+        '<input class="vp-input" type="date" id="entry-date" value="' + todayStr() + '" />' +
+        '<input class="vp-input" style="width:110px;" type="time" id="entry-in" value="08:00" lang="th" step="60" />' +
+        '<span style="color:var(--text-secondary);">ถึง</span>' +
+        '<input class="vp-input" style="width:110px;" type="time" id="entry-out" placeholder="ยังไม่ทราบ" lang="th" step="60" />' +
+        '<button class="vp-btn-primary" data-action="add-entry">' + icon("plus") + ' บันทึก</button>' +
+        '</div>';
+    }
+    manualForm += '</div>';
+
+    var sorted = getSortedEntries();
+    var history = '<div class="card"><div class="card-title">ประวัติการทำงาน (' + sorted.length + ')</div>';
+    if (sorted.length === 0) {
+      history += '<div class="empty-note">ยังไม่มีบันทึกเวลาทำงาน</div>';
+    } else {
+      history += '<div class="table-wrap"><table class="vp-table"><thead><tr>' +
+        '<th>วันที่</th><th>พนักงาน</th><th>เข้างาน</th><th>ออกงาน</th><th>ชั่วโมง</th><th>ค่าแรง</th><th></th>' +
+        '</tr></thead><tbody>';
+      sorted.forEach(function (entry) {
+        var emp = em[entry.employeeId];
+        var active2 = !entry.timeOut;
+        var hrs = calcHours(entry.timeIn, entry.timeOut);
+        var wage = emp && !active2 ? hrs * emp.rate : 0;
+        history += '<tr>' +
+          '<td>' + entry.date + '</td>' +
+          '<td>' + (emp ? esc(emp.name) : '<span style="color:var(--text-secondary);">พนักงานถูกลบ</span>') + '</td>' +
+          '<td>' + entry.timeIn + '</td>' +
+          '<td>' + (active2 ? '<span class="badge-status">กำลังทำงาน</span>' : entry.timeOut) + '</td>' +
+          '<td>' + (active2 ? "-" : hrsFmt(hrs)) + '</td>' +
+          '<td style="font-weight:600;color:var(--primary-dark);">' + (active2 ? "-" : thb(wage)) + '</td>' +
+          '<td><button class="vp-icon-btn danger" data-action="delete-entry" data-id="' + entry.id + '">' + icon("trash-2", 'style="color:var(--danger)"') + '</button></td>' +
+          '</tr>';
+      });
+      history += '</tbody></table></div>';
+    }
+    history += '</div>';
+
+    return clockCard + manualForm + history;
+  }
+
+  /* ---------- render: payment ---------- */
+  function renderPayment() {
+    var em = empMap();
+    var unpaidTotal = getUnpaidTotal(em);
+    var actualPaidTotal = getActualPaidTotal();
+    var payEntries = getPaymentEntries();
+
+    var ranges = [["today", "วันนี้"], ["week", "สัปดาห์นี้"], ["month", "เดือนนี้"], ["all", "ทั้งหมด"]];
+    var rangeHtml = '<div class="filter-row">' + icon("calendar-range") +
+      ranges.map(function (r) {
+        return '<button class="vp-range ' + (state.payRange === r[0] ? "active" : "") + '" data-action="set-pay-range" data-range="' + r[0] + '">' + r[1] + '</button>';
+      }).join("") + '</div>';
+
+    var filters = [["unpaid", "ยังไม่จ่าย"], ["paid", "จ่ายแล้ว"], ["all", "ทั้งหมด"]];
+    var top = '<div class="row-between" style="margin-bottom:16px;">' +
+      '<div style="display:flex;gap:6px;">' +
+      filters.map(function (f) {
+        return '<button class="vp-range ' + (state.payFilter === f[0] ? "active" : "") + '" data-action="set-pay-filter" data-filter="' + f[0] + '">' + f[1] + '</button>';
+      }).join("") + '</div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+      '<div style="background:var(--accent-tint);color:#7A5A0C;font-size:13px;font-weight:600;padding:6px 14px;border-radius:999px;">ยอดค้างจ่ายรวม ' + thb(unpaidTotal) + '</div>' +
+      '<div style="background:var(--primary-tint);color:var(--primary-dark);font-size:13px;font-weight:600;padding:6px 14px;border-radius:999px;">จ่ายเงินจริงรวม ' + thb(actualPaidTotal) + '</div>' +
+      '</div></div>';
+
+    var card = '<div class="card"><div class="card-title">รายการจ่ายเงิน (' + payEntries.length + ')</div>';
+    if (payEntries.length === 0) {
+      card += '<div class="empty-note">ไม่มีรายการในหมวดนี้</div>';
+    } else {
+      card += '<div class="table-wrap"><table class="vp-table"><thead><tr>' +
+        '<th>วันที่</th><th>ชื่อพนักงาน</th><th>เวลาเข้างาน</th><th>เวลาออกงาน</th><th>เวลาทำงานทั้งหมด</th><th>ค่าแรง</th><th>จ่ายเงินจริง</th><th></th>' +
+        '</tr></thead><tbody>';
+      payEntries.forEach(function (entry) {
+        var emp = em[entry.employeeId];
+        var hrs = calcHours(entry.timeIn, entry.timeOut);
+        var wage = emp ? hrs * emp.rate : 0;
+        var draft = state.actualPaidDrafts[entry.id];
+        var actualValue = draft !== undefined ? draft :
+          (entry.actualPaid !== undefined && entry.actualPaid !== null && entry.actualPaid !== "" ? entry.actualPaid : Math.round(wage));
+        card += '<tr>' +
+          '<td>' + entry.date + '</td>' +
+          '<td style="font-weight:500;">' + (emp ? esc(emp.name) : '<span style="color:var(--text-secondary);">พนักงานถูกลบ</span>') + '</td>' +
+          '<td>' + entry.timeIn + '</td>' +
+          '<td>' + entry.timeOut + '</td>' +
+          '<td>' + hrsFmt(hrs) + '</td>' +
+          '<td style="font-weight:600;color:var(--primary-dark);">' + thb(wage) + '</td>' +
+          '<td><input class="vp-input actual-paid-input" type="number" step="1" min="0" ' + (entry.paid ? "disabled" : "") +
+          ' data-role="actual-paid-input" data-id="' + entry.id + '" value="' + actualValue + '" /></td>' +
+          '<td>' + (entry.paid ?
+            '<span class="badge-status paid">' + icon("check") + ' จ่ายเงินแล้ว</span>' :
+            '<button class="vp-btn-primary" data-action="mark-paid" data-id="' + entry.id + '">' + icon("wallet") + ' จ่ายเงิน</button>') +
+          '</td></tr>';
+      });
+      card += '</tbody></table></div>';
+    }
+    card += '</div>';
+
+    return rangeHtml + top + card;
+  }
+
+  /* ---------- full render ---------- */
+  function render() {
+    var now = new Date();
+    var tabs = [
+      ["dashboard", "layout-dashboard", "แดชบอร์ด"],
+      ["employees", "users", "พนักงาน"],
+      ["entries", "clock-3", "บันทึกเวลา"],
+      ["payment", "wallet", "จ่ายเงิน"]
+    ];
+
+    var tabsHtml = '<div class="tabs">' + tabs.map(function (t) {
+      return '<button class="vp-tab ' + (state.tab === t[0] ? "active" : "") + '" data-action="set-tab" data-tab="' + t[0] + '">' + icon(t[1]) + ' ' + t[2] + '</button>';
+    }).join("") + '</div>';
+
+    var leaves = '<div class="leaf-divider">' +
+      Array.from({ length: 24 }).map(function (_, i) { return '<div class="leaf-tick ' + (i % 3 === 0 ? "accent" : "") + '"></div>'; }).join("") +
+      '</div>';
+
+    var header = '<div class="header-row">' +
+      '<div class="logo-box">' + icon("sprout", 'style="color:#fff;width:24px;height:24px;"') + '</div>' +
+      '<div>' +
+      '<div class="app-title">คิดค่าแรง แผนกคัดผัก</div>' +
+      '<div class="app-subtitle">บันทึกเวลาเข้า-ออกงาน และคำนวณค่าแรงอัตโนมัติ</div>' +
+      '<div class="live-badge">' + icon("clock-3", 'style="width:12px;height:12px;"') + ' <span id="live-clock-header">' + thaiDateTime(now) + '</span></div>' +
+      '</div></div>';
+
+    var body;
+    if (state.tab === "dashboard") body = renderDashboard();
+    else if (state.tab === "employees") body = renderEmployees();
+    else if (state.tab === "entries") body = renderEntries();
+    else body = renderPayment();
+
+    document.getElementById("app").innerHTML = header + leaves + tabsHtml + '<div class="content">' + body + '</div>';
+
+    var elClock = document.getElementById("live-clock-entries");
+    if (elClock) elClock.textContent = thaiDateTime(now);
+
+    if (window.lucide) lucide.createIcons();
+  }
+
+  /* ---------- live ticking (no full re-render, avoids disrupting inputs) ---------- */
+  function tickLive() {
+    var now = new Date();
+    var headerClock = document.getElementById("live-clock-header");
+    if (headerClock) headerClock.textContent = thaiDateTime(now);
+    var entriesClock = document.getElementById("live-clock-entries");
+    if (entriesClock) entriesClock.textContent = thaiDateTime(now);
+
+    document.querySelectorAll(".js-elapsed").forEach(function (el) {
+      var start = new Date(el.getAttribute("data-start"));
+      var hrs = Math.max(0, (now - start) / 3600000);
+      el.textContent = elapsedFmt(hrs);
+    });
+    document.querySelectorAll(".js-wage").forEach(function (el) {
+      var start = new Date(el.getAttribute("data-start"));
+      var rate = parseFloat(el.getAttribute("data-rate")) || 0;
+      var hrs = Math.max(0, (now - start) / 3600000);
+      el.textContent = thb(hrs * rate);
+    });
+  }
+  setInterval(tickLive, 1000);
+
+  /* ---------- event delegation ---------- */
+  document.getElementById("app").addEventListener("click", function (e) {
+    var btn = e.target.closest("[data-action]");
+    if (!btn) return;
+    var action = btn.getAttribute("data-action");
+    var id = btn.getAttribute("data-id");
+    switch (action) {
+      case "set-tab": state.tab = btn.getAttribute("data-tab"); render(); break;
+      case "set-range": state.range = btn.getAttribute("data-range"); render(); break;
+      case "set-pay-filter": state.payFilter = btn.getAttribute("data-filter"); render(); break;
+      case "set-pay-range": state.payRange = btn.getAttribute("data-range"); render(); break;
+      case "add-employee": addEmployee(); break;
+      case "delete-employee": deleteEmployee(id); break;
+      case "edit-employee": startEdit(id); break;
+      case "confirm-edit": confirmEdit(id); break;
+      case "cancel-edit": cancelEdit(); break;
+      case "add-entry": addEntry(); break;
+      case "delete-entry": deleteEntry(id); break;
+      case "toggle-clock-emp": toggleClockEmp(id); break;
+      case "clock-in": clockIn(); break;
+      case "clock-out": clockOut(id); break;
+      case "clock-out-all": clockOutAll(); break;
+      case "mark-paid":
+        var input = document.querySelector('[data-role="actual-paid-input"][data-id="' + id + '"]');
+        var val = input ? parseFloat(input.value) : NaN;
+        if (isNaN(val)) {
+          var em = empMap();
+          var entry = state.entries.filter(function (x) { return x.id === id; })[0];
+          var emp = entry ? em[entry.employeeId] : null;
+          var hrs = entry ? calcHours(entry.timeIn, entry.timeOut) : 0;
+          val = Math.round(emp ? hrs * emp.rate : 0);
+        }
+        markPaid(id, val);
+        break;
+    }
+  });
+
+  document.getElementById("app").addEventListener("input", function (e) {
+    var el = e.target;
+    if (el.getAttribute && el.getAttribute("data-role") === "actual-paid-input") {
+      var id = el.getAttribute("data-id");
+      var v = el.value === "" ? "" : parseFloat(el.value);
+      state.actualPaidDrafts[id] = v;
+    }
+  });
+
+  /* ---------- init ---------- */
+  render();
+})();
+</script>
+</body>
+</html>
