@@ -228,6 +228,7 @@
     payRange: "all",
     manualKnowsEnd: true,
     manualStartEmpIds: [],
+    manualBothEmpIds: [],
     editingId: null,
     clockEmpIds: [],
     actualPaidDrafts: {}
@@ -337,13 +338,15 @@
     var knowsEnd = state.manualKnowsEnd;
 
     if (knowsEnd) {
-      var empEl = document.getElementById("entry-emp");
       var outEl = document.getElementById("entry-out");
-      if (!empEl.value || !outEl || !outEl.value) return;
-      saveEntries(state.entries.concat([{
-        id: uid("ent"), employeeId: empEl.value, date: dateEl.value,
-        timeIn: inEl.value, timeOut: outEl.value, paid: false
-      }]));
+      if (!outEl || !outEl.value) return;
+      var bothIds = state.manualBothEmpIds.filter(Boolean);
+      if (bothIds.length === 0) return;
+      var bothEntries = bothIds.map(function (employeeId) {
+        return { id: uid("ent"), employeeId: employeeId, date: dateEl.value, timeIn: inEl.value, timeOut: outEl.value, paid: false };
+      });
+      state.manualBothEmpIds = [];
+      saveEntries(state.entries.concat(bothEntries));
     } else {
       var ids = state.manualStartEmpIds.filter(Boolean);
       if (ids.length === 0) return;
@@ -359,9 +362,15 @@
     if (idx === -1) state.manualStartEmpIds.push(id); else state.manualStartEmpIds.splice(idx, 1);
     render();
   }
+  function toggleManualBothEmp(id) {
+    var idx = state.manualBothEmpIds.indexOf(id);
+    if (idx === -1) state.manualBothEmpIds.push(id); else state.manualBothEmpIds.splice(idx, 1);
+    render();
+  }
   function setManualMode(knowsEnd) {
     state.manualKnowsEnd = knowsEnd;
     state.manualStartEmpIds = [];
+    state.manualBothEmpIds = [];
     render();
   }
   function deleteEntry(id) {
@@ -723,21 +732,27 @@
         '</div>';
       manualForm += '<div style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;">' +
         (knowsEnd
-          ? 'ใช้ตอนที่พนักงานเข้างานและเลิกงานไปแล้ว ระบุทั้งเวลาเข้าและเวลาออกย้อนหลังได้ครบ'
+          ? 'ใช้ตอนที่พนักงานเข้างานและเลิกงานไปแล้ว เลือกได้หลายคนพร้อมกันถ้าเข้างานและเลิกงานพร้อมกัน ระบุวันที่ เวลาเข้า และเวลาออกย้อนหลังได้ครบ'
           : 'ใช้ตอนที่พนักงานเข้างานไปแล้วแต่ยังไม่เลิกงาน เลือกได้หลายคนพร้อมกันถ้ามาพร้อมกันแล้วลืมบันทึก ระบบจะเริ่มนับเวลาทำงานต่อให้ทันที และไปแสดงในช่อง "กำลังทำงาน" ด้านบน') +
         '</div>';
 
       if (knowsEnd) {
-        manualForm += '<div class="form-inline">' +
-          '<select class="vp-input" style="flex:1 1 160px;" id="entry-emp"><option value="">เลือกพนักงาน</option>' +
-          state.employees.map(function (emp) { return '<option value="' + emp.id + '">' + esc(emp.name) + '</option>'; }).join("") +
-          '</select>' +
+        manualForm += '<div class="form-inline" style="margin-bottom:12px;">' +
           '<input class="vp-input" type="date" id="entry-date" value="' + todayStr() + '" />' +
           '<input class="vp-input" style="width:110px;" type="time" id="entry-in" value="08:00" lang="th" step="60" />' +
           '<span style="color:var(--text-secondary);">ถึง</span>' +
           '<input class="vp-input" style="width:110px;" type="time" id="entry-out" lang="th" step="60" />' +
-          '<button class="vp-btn-primary" data-action="add-entry">' + icon("plus") + ' บันทึก</button>' +
-          '</div>';
+          '</div>' +
+          '<div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">เลือกพนักงาน (เลือกได้มากกว่า 1 คน)</div>' +
+          '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">';
+        state.employees.forEach(function (emp) {
+          var selectedBoth = state.manualBothEmpIds.indexOf(emp.id) !== -1;
+          manualForm += '<button type="button" class="chip ' + (selectedBoth ? "selected" : "") + '" data-action="toggle-manual-both-emp" data-id="' + emp.id + '">' +
+            (selectedBoth ? icon("check") : "") + esc(emp.name) + '</button>';
+        });
+        manualForm += '</div>' +
+          '<button class="vp-btn-primary" data-action="add-entry" ' + (state.manualBothEmpIds.length === 0 ? "disabled" : "") + '>' +
+          icon("plus") + ' บันทึก' + (state.manualBothEmpIds.length > 0 ? " (" + state.manualBothEmpIds.length + " คน)" : "") + '</button>';
       } else {
         var manualClockable = getClockableEmployees();
         manualForm += '<div class="form-inline" style="margin-bottom:12px;">' +
@@ -1048,6 +1063,7 @@
       case "delete-entry": deleteEntry(id); break;
       case "toggle-clock-emp": toggleClockEmp(id); break;
       case "toggle-manual-start-emp": toggleManualStartEmp(id); break;
+      case "toggle-manual-both-emp": toggleManualBothEmp(id); break;
       case "clock-in": clockIn(); break;
       case "clock-out": clockOut(id); break;
       case "clock-out-all": clockOutAll(); break;
