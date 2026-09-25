@@ -142,6 +142,19 @@
   .recent-amt { font-size: 13px; font-weight: 700; color: var(--primary-dark); }
   .charts-row { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; }
   .line-chart-wrap svg { width: 100%; height: 140px; display: block; }
+  .top-earner-banner { display: flex; align-items: center; gap: 10px; background: var(--yellow-tint); border-radius: 14px; padding: 12px 16px; margin-bottom: 16px; }
+  .top-earner-banner svg { width: 22px; height: 22px; color: #FFA800; flex-shrink: 0; }
+  .top-earner-label { font-size: 11px; color: #A66B00; }
+  .top-earner-value { font-family: 'Kanit', sans-serif; font-weight: 700; font-size: 15px; color: #7A5A00; }
+  .wage-bar-list { display: flex; flex-direction: column; gap: 12px; }
+  .wage-bar-row { display: flex; align-items: center; gap: 10px; }
+  .wage-bar-name { width: 100px; flex-shrink: 0; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 4px; overflow: hidden; }
+  .wage-bar-name span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .wage-bar-row.top .wage-bar-name, .wage-bar-row.top .wage-bar-amt { color: #A66B00; font-weight: 700; }
+  .wage-bar-name svg { color: #FFA800; }
+  .wage-bar-track { flex: 1; height: 14px; border-radius: 999px; background: var(--border); overflow: hidden; min-width: 40px; }
+  .wage-bar-fill { height: 100%; border-radius: 999px; }
+  .wage-bar-amt { width: 88px; flex-shrink: 0; text-align: right; font-size: 13px; font-weight: 700; color: var(--text); }
   .donut-wrap { display: flex; align-items: center; gap: 18px; }
   .donut { width: 120px; height: 120px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
   .donut-center { width: 68px; height: 68px; border-radius: 50%; background: var(--surface); display: flex; align-items: center; justify-content: center; flex-direction: column; }
@@ -445,27 +458,6 @@
       .slice(0, limit);
   }
 
-  function getLast7DaysWage() {
-    var em = empMap();
-    var days = [];
-    for (var i = 6; i >= 0; i--) {
-      var d = new Date();
-      d.setDate(d.getDate() - i);
-      var key = d.toISOString().slice(0, 10);
-      var label = d.toLocaleDateString("th-TH", { weekday: "short" });
-      days.push({ date: key, label: label, wage: 0 });
-    }
-    var map = {};
-    days.forEach(function (d) { map[d.date] = d; });
-    getCompletedEntries().forEach(function (e) {
-      if (!map[e.date]) return;
-      var emp = em[e.employeeId];
-      var hrs = calcHours(e.timeIn, e.timeOut);
-      map[e.date].wage += emp ? hrs * emp.rate : 0;
-    });
-    return days;
-  }
-
   /* ---------- render: dashboard ---------- */
   function renderDashboard() {
     var em = empMap();
@@ -473,7 +465,6 @@
     var summary = getDashboardSummary(em, state.range);
     var progress = getPaymentProgress();
     var recentPaid = getRecentPaid(4);
-    var week = getLast7DaysWage();
 
     var ranges = [["today", "วันนี้"], ["week", "สัปดาห์นี้"], ["month", "เดือนนี้"], ["all", "ทั้งหมด"]];
     var rangeHtml = '<div class="filter-row">' + icon("calendar-range") +
@@ -563,28 +554,36 @@
       '</div>';
 
     /* ---- charts row ---- */
-    var maxWage = Math.max.apply(null, week.map(function (d) { return d.wage; }).concat([1]));
-    var w = 560, h = 130, padX = 10, padY = 14;
-    var stepX = (w - padX * 2) / (week.length - 1);
-    var points = week.map(function (d, i) {
-      var x = padX + i * stepX;
-      var y = padY + (1 - d.wage / maxWage) * (h - padY * 2);
-      return { x: x, y: y, d: d };
-    });
-    var linePath = points.map(function (p, i) { return (i === 0 ? "M" : "L") + p.x.toFixed(1) + "," + p.y.toFixed(1); }).join(" ");
-    var areaPath = linePath + " L" + points[points.length - 1].x.toFixed(1) + "," + (h - padY) + " L" + points[0].x.toFixed(1) + "," + (h - padY) + " Z";
-    var dotsSvg = points.map(function (p) { return '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="3.5" fill="#6C5DD3" />'; }).join("");
-    var labelsSvg = points.map(function (p) { return '<text x="' + p.x.toFixed(1) + '" y="' + (h - 1) + '" font-size="10" fill="#8A8FA3" text-anchor="middle" font-family="Noto Sans Thai">' + esc(p.d.label) + '</text>'; }).join("");
-    var lineChart = '<div class="card">' +
-      '<div class="card-title">ค่าแรงรายวัน (7 วันล่าสุด)</div>' +
-      '<div class="line-chart-wrap"><svg viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none">' +
-      '<defs><linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">' +
-      '<stop offset="0%" stop-color="#6C5DD3" stop-opacity="0.28"/><stop offset="100%" stop-color="#6C5DD3" stop-opacity="0"/>' +
-      '</linearGradient></defs>' +
-      '<path d="' + areaPath + '" fill="url(#areaGrad)" stroke="none" />' +
-      '<path d="' + linePath + '" fill="none" stroke="#6C5DD3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />' +
-      dotsSvg + labelsSvg +
-      '</svg></div></div>';
+    var rangeLabelText = RANGE_LABELS[state.range] || "ทั้งหมด";
+    var barPalette = ["#6C5DD3", "#2ED47A", "#4FD1C5", "#A78BFA", "#5B8DEF", "#34D399", "#818CF8", "#38BDF8"];
+    var maxEmpWage = Math.max.apply(null, summary.byEmp.map(function (r) { return r.wage; }).concat([1]));
+    var topEarner = summary.byEmp.length > 0 ? summary.byEmp[0] : null;
+
+    var barChartInner;
+    if (summary.byEmp.length === 0) {
+      barChartInner = '<div class="empty-note">ยังไม่มีข้อมูลค่าแรงในช่วงนี้</div>';
+    } else {
+      var topBanner = (topEarner && topEarner.wage > 0)
+        ? '<div class="top-earner-banner">' + icon("crown") +
+          '<div><div class="top-earner-label">ได้ค่าแรงสูงสุด (' + rangeLabelText + ')</div>' +
+          '<div class="top-earner-value">' + esc(topEarner.name) + ' · ' + thb(topEarner.wage) + '</div></div></div>'
+        : '';
+      var barsHtml = summary.byEmp.map(function (row, i) {
+        var pct = maxEmpWage > 0 ? Math.max(row.wage > 0 ? 4 : 0, Math.round((row.wage / maxEmpWage) * 100)) : 0;
+        var isTop = i === 0 && row.wage > 0;
+        var fillStyle = isTop ? "background:linear-gradient(90deg,#FFA800,#FFD166);" : "background:" + barPalette[i % barPalette.length] + ";";
+        return '<div class="wage-bar-row ' + (isTop ? "top" : "") + '">' +
+          '<div class="wage-bar-name">' + (isTop ? icon("crown", 'style="width:13px;height:13px;flex-shrink:0;"') : '') + '<span>' + esc(row.name) + '</span></div>' +
+          '<div class="wage-bar-track"><div class="wage-bar-fill" style="width:' + pct + '%;' + fillStyle + '"></div></div>' +
+          '<div class="wage-bar-amt">' + thb(row.wage) + '</div>' +
+          '</div>';
+      }).join("");
+      barChartInner = topBanner + '<div class="wage-bar-list">' + barsHtml + '</div>';
+    }
+    var wageBarChart = '<div class="card">' +
+      '<div class="card-title">ค่าแรงรายคน (' + rangeLabelText + ')</div>' +
+      barChartInner +
+      '</div>';
 
     var donutRows = summary.byEmp.slice(0, 4);
     var donutOther = summary.byEmp.slice(4).reduce(function (s, r) { return s + r.wage; }, 0);
@@ -616,9 +615,9 @@
         '<div class="legend">' + legendHtml + '</div>' +
         '</div>';
     }
-    var donutChart = '<div class="card"><div class="card-title">สัดส่วนค่าแรงตามพนักงาน</div>' + donutHtml + '</div>';
+    var donutChart = '<div class="card"><div class="card-title">สัดส่วนค่าแรงตามพนักงาน (' + rangeLabelText + ')</div>' + donutHtml + '</div>';
 
-    var chartsRow = '<div class="charts-row">' + lineChart + donutChart + '</div>';
+    var chartsRow = '<div class="charts-row">' + wageBarChart + donutChart + '</div>';
 
     return rangeHtml + stats + dashGrid + chartsRow;
   }
