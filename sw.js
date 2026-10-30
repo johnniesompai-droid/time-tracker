@@ -1,6 +1,6 @@
 /* Service worker: ให้แอปเปิดใช้งานได้แม้ไม่มีอินเทอร์เน็ต
    เมื่อแก้ไขไฟล์แอป ให้เพิ่มเลข VERSION เพื่อให้เครื่องผู้ใช้โหลดเวอร์ชันใหม่ */
-var VERSION = "v4";
+var VERSION = "v5";
 var CACHE = "veggie-payroll-" + VERSION;
 
 var CORE = [
