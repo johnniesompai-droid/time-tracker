@@ -339,6 +339,15 @@ i[data-lucide],svg.lucide{width:1.15em;height:1.15em;stroke-width:2.1;flex-shrin
 .badge{position:absolute;top:3px;right:calc(50% - 25px);min-width:18px;height:18px;border-radius:99px;background:var(--red);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;padding:0 5px;border:2px solid #fff}
 .badge.g{background:var(--g600)}
 
+/* มือถือ: เมนูเล็กลง และอยู่ต่ำลงแต่ไม่ชิดขอบ (เว้นแถบโฮมของ iPhone) */
+@media(max-width:600px){
+  .nav{width:min(340px,calc(100% - 56px));bottom:calc(env(safe-area-inset-bottom,0px)*.5 + 8px);border-radius:38px}
+  .nav-pill{border-radius:32px}
+  .nav button{padding:7px 2px 5px;font-size:10.5px;border-radius:32px;gap:1px}
+  .nav button i,.nav button svg{width:21px;height:21px}
+  .badge{top:1px;min-width:16px;height:16px;font-size:10px;right:calc(50% - 22px)}
+  .shell{padding-bottom:calc(100px + env(safe-area-inset-bottom))}
+}
 /* toast + modal */
 #toasts{position:fixed;left:50%;transform:translateX(-50%);top:max(14px,env(safe-area-inset-top));z-index:200;display:grid;gap:8px;width:min(420px,calc(100% - 28px));pointer-events:none}
 .toast{display:flex;align-items:center;gap:10px;background:var(--g900);color:#fff;padding:12px 16px;border-radius:18px;box-shadow:0 12px 30px rgba(0,0,0,.25);font-size:14px;font-weight:500;animation:tin .3s cubic-bezier(.2,.9,.3,1.2)}
