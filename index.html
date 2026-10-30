@@ -314,16 +314,28 @@ i[data-lucide],svg.lucide{width:1.15em;height:1.15em;stroke-width:2.1;flex-shrin
 .share-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
 
 /* glass nav */
-.nav{position:fixed;left:50%;transform:translateX(-50%);bottom:max(14px,env(safe-area-inset-bottom));width:min(430px,calc(100% - 24px));z-index:50;
-  display:flex;gap:2px;padding:7px;border-radius:30px;
-  background:linear-gradient(135deg,rgba(255,255,255,.74),rgba(226,246,230,.48));
-  backdrop-filter:blur(30px) saturate(190%);-webkit-backdrop-filter:blur(30px) saturate(190%);
-  border:1px solid rgba(255,255,255,.75);
-  box-shadow:0 14px 40px rgba(15,61,34,.22),0 2px 6px rgba(15,61,34,.08),inset 0 1.5px 0 rgba(255,255,255,.95),inset 0 -1px 0 rgba(46,139,62,.12)}
-.nav button{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 2px 7px;border-radius:23px;color:var(--ink2);font-size:11.5px;font-weight:600;transition:color .25s,background .25s,box-shadow .25s}
-.nav button i,.nav button svg{width:23px;height:23px}
-.nav button.on{color:var(--g800);background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.55));box-shadow:0 4px 14px rgba(15,61,34,.14),inset 0 1px 0 #fff}
-.nav button.on i,.nav button.on svg{color:var(--g600)}
+.nav{position:fixed;left:50%;transform:translateX(-50%);bottom:max(14px,env(safe-area-inset-bottom));width:min(420px,calc(100% - 28px));z-index:50;
+  display:flex;padding:7px;border-radius:44px;isolation:isolate;
+  background:linear-gradient(145deg,rgba(255,255,255,.62),rgba(214,243,222,.30) 55%,rgba(255,255,255,.45));
+  backdrop-filter:blur(26px) saturate(210%) brightness(1.04);-webkit-backdrop-filter:blur(26px) saturate(210%) brightness(1.04);
+  border:1px solid rgba(255,255,255,.8);
+  box-shadow:0 18px 44px rgba(15,61,34,.24),0 3px 8px rgba(15,61,34,.10),inset 0 2px 1px rgba(255,255,255,.95),inset 0 -2px 6px rgba(46,139,62,.14),inset 0 0 22px rgba(255,255,255,.35)}
+.nav:before{content:"";position:absolute;left:14px;right:14px;top:2px;height:46%;border-radius:40px 40px 60% 60%/40px 40px 24px 24px;background:linear-gradient(180deg,rgba(255,255,255,.65),rgba(255,255,255,0));pointer-events:none;z-index:-1}
+.nav{touch-action:none;user-select:none;-webkit-user-select:none}
+.nav.press{box-shadow:0 22px 50px rgba(15,61,34,.28),0 3px 8px rgba(15,61,34,.10),inset 0 2px 1px rgba(255,255,255,.95),inset 0 -2px 6px rgba(46,139,62,.14),inset 0 0 26px rgba(255,255,255,.5)}
+.nav.press .nav-pill{scale:1.16 1.22;background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(228,248,233,.5));box-shadow:0 10px 26px rgba(15,61,34,.24),inset 0 2px 2px #fff,inset 0 -4px 10px rgba(67,168,87,.28),0 0 0 1px rgba(255,255,255,.85)}
+.nav.drag .nav-pill{transition:none}
+.nav button.hot{color:var(--g800)}.nav button.hot i,.nav button.hot svg{color:var(--g600);transform:translateY(-1px) scale(1.12)}
+.nav-pill{transition:transform .45s cubic-bezier(.34,1.4,.5,1),scale .3s cubic-bezier(.34,1.6,.5,1),box-shadow .3s,background .3s}
+.nav-pill{position:absolute;top:7px;bottom:7px;left:7px;width:calc((100% - 14px)/4);border-radius:36px;z-index:-1;
+  background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(236,250,239,.72));
+  box-shadow:0 6px 16px rgba(15,61,34,.18),inset 0 1.5px 1px #fff,inset 0 -3px 8px rgba(67,168,87,.20),0 0 0 1px rgba(255,255,255,.7);
+  transition:transform .45s cubic-bezier(.34,1.4,.5,1)}
+.nav button{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 2px 8px;border-radius:36px;color:var(--ink2);font-size:11.5px;font-weight:600;transition:color .25s}
+.nav button i,.nav button svg{width:24px;height:24px;transition:transform .35s cubic-bezier(.34,1.6,.5,1)}
+.nav button.on{color:var(--g800)}
+.nav button.on i,.nav button.on svg{color:var(--g600);transform:translateY(-1px) scale(1.12)}
+.nav button:active i,.nav button:active svg{transform:scale(.9)}
 .badge{position:absolute;top:3px;right:calc(50% - 25px);min-width:18px;height:18px;border-radius:99px;background:var(--red);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;padding:0 5px;border:2px solid #fff}
 .badge.g{background:var(--g600)}
 
@@ -911,11 +923,27 @@ i[data-lucide],svg.lucide{width:1.15em;height:1.15em;stroke-width:2.1;flex-shrin
       '<div class="top-actions">' + (!isStandalone() ? '<button class="install-btn" data-action="install-app">' + icon("download") + '<span>ติดตั้งแอป</span></button>' : '') +
       '<div class="clock-chip num">' + icon("clock-3") + '<span class="js-time">' + clockTime(now) + '</span></div></div></header>';
     var body = state.tab === "dashboard" ? renderDashboard() : state.tab === "employees" ? renderEmployees() : state.tab === "entries" ? renderEntries() : renderPayment();
-    var nav = '<nav class="nav" aria-label="เมนูหลัก">' + tabs.map(function (t) {
+    var idx = 0; tabs.forEach(function (t, i) { if (t[0] === state.tab) idx = i; });
+    var nav = '<nav class="nav" aria-label="เมนูหลัก"><span class="nav-pill" style="transform:translateX(' + idx * 100 + '%)"></span>' + tabs.map(function (t) {
       return '<button class="' + (state.tab === t[0] ? "on" : "") + '" data-action="set-tab" data-tab="' + t[0] + '" ' + (state.tab === t[0] ? 'aria-current="page"' : '') + '>' + icon(t[1]) + '<span>' + t[2] + '</span>' +
         (t[0] === "entries" && active ? '<span class="badge g">' + active + '</span>' : '') + '</button>';
     }).join("") + '</nav>';
+    var oldNav = document.querySelector("#app .nav");
     document.getElementById("app").innerHTML = '<div class="shell">' + top + body + '</div>' + nav;
+    if (window.lucide) lucide.createIcons();
+    if (oldNav) {
+      /* คงเมนูเดิมไว้ เพื่อให้แถบกระจกเลื่อนไปหาแท็บใหม่ได้นุ่ม ๆ */
+      var fresh = document.querySelector("#app .nav");
+      oldNav.querySelectorAll("button").forEach(function (bt, i) {
+        var nb = fresh.querySelectorAll("button")[i];
+        bt.className = nb.className;
+        var o = bt.querySelector(".badge"), n = nb.querySelector(".badge");
+        if (o && !n) o.remove(); else if (n && !o) bt.appendChild(n.cloneNode(true)); else if (n && o) o.textContent = n.textContent;
+        if (bt.hasAttribute("aria-current") !== nb.hasAttribute("aria-current")) { nb.hasAttribute("aria-current") ? bt.setAttribute("aria-current", "page") : bt.removeAttribute("aria-current"); }
+      });
+      oldNav.querySelector(".nav-pill").style.transform = "translateX(" + idx * 100 + "%)";
+      fresh.replaceWith(oldNav);
+    }
     if (window.lucide) lucide.createIcons();
     tickLive();
   }
@@ -943,8 +971,47 @@ i[data-lucide],svg.lucide{width:1.15em;height:1.15em;stroke-width:2.1;flex-shrin
   }
   setInterval(tickLive, 1000);
 
+  /* ---------- ลากนิ้วบนเมนูล่างเพื่อเลือกแท็บ ---------- */
+  var navTabs = ["dashboard", "employees", "entries", "payment"], navDrag = null, suppressClick = false;
+  function navIndexAt(nav, x) {
+    var r = nav.getBoundingClientRect(), seg = (r.width - 14) / 4;
+    var px = Math.min(Math.max(x - r.left - 7 - seg / 2, 0), seg * 3);
+    return { px: px, idx: Math.round(px / seg) };
+  }
+  document.addEventListener("pointerdown", function (e) {
+    var nav = e.target.closest && e.target.closest(".nav"); if (!nav || e.button > 0) return;
+    navDrag = { nav: nav, x0: e.clientX, moved: false, id: e.pointerId };
+    nav.classList.add("press");
+  });
+  document.addEventListener("pointermove", function (e) {
+    if (!navDrag || e.pointerId !== navDrag.id) return;
+    if (!navDrag.moved && Math.abs(e.clientX - navDrag.x0) < 6) return;
+    navDrag.moved = true;
+    try { navDrag.nav.setPointerCapture(navDrag.id); } catch (er) {}
+    var nav = navDrag.nav, o = navIndexAt(nav, e.clientX);
+    nav.classList.add("drag");
+    nav.querySelector(".nav-pill").style.transform = "translateX(" + o.px + "px)";
+    nav.querySelectorAll("button").forEach(function (b, i) { b.classList.toggle("hot", i === o.idx); });
+    if (navDrag.last !== o.idx) { navDrag.last = o.idx; if (navigator.vibrate) navigator.vibrate(6); }
+  });
+  function endNavDrag(e) {
+    if (!navDrag || e.pointerId !== navDrag.id) return;
+    var d = navDrag, nav = d.nav; navDrag = null;
+    nav.classList.remove("press", "drag");
+    nav.querySelectorAll("button").forEach(function (b) { b.classList.remove("hot"); });
+    if (!d.moved) return;
+    suppressClick = true; setTimeout(function () { suppressClick = false; }, 350);
+    if (e.type === "pointercancel") { nav.querySelector(".nav-pill").style.transform = "translateX(" + navTabs.indexOf(state.tab) * 100 + "%)"; return; }
+    var t = navTabs[navIndexAt(nav, e.clientX).idx];
+    if (t !== state.tab) { state.tab = t; render(); window.scrollTo(0, 0); }
+    else nav.querySelector(".nav-pill").style.transform = "translateX(" + navTabs.indexOf(t) * 100 + "%)";
+  }
+  document.addEventListener("pointerup", endNavDrag);
+  document.addEventListener("pointercancel", endNavDrag);
+
   /* ---------- events ---------- */
   document.getElementById("app").addEventListener("click", function (e) {
+    if (suppressClick) return;
     var btn = e.target.closest("[data-action]"); if (!btn || btn.disabled) return;
     var a = btn.getAttribute("data-action"), id = btn.getAttribute("data-id");
     switch (a) {
