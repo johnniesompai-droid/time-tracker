@@ -341,6 +341,10 @@ i[data-lucide],svg.lucide{width:1.15em;height:1.15em;stroke-width:2.1;flex-shrin
 
 /* มือถือ: เมนูเล็กลง และอยู่ต่ำลงแต่ไม่ชิดขอบ (เว้นแถบโฮมของ iPhone) */
 @media(max-width:600px){
+  .mrow{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:12px}
+  .mrow .field{min-width:0;flex:none!important;width:100%}
+  .mrow .field.full{grid-column:1/-1}
+  .mrow .input{min-width:0;width:100%;max-width:100%;-webkit-appearance:none;appearance:none;padding:0 10px;display:block}
   .nav{width:min(340px,calc(100% - 56px));bottom:calc(env(safe-area-inset-bottom,0px)*.5 + 8px);border-radius:38px}
   .nav-pill{border-radius:32px}
   .nav button{padding:7px 2px 5px;font-size:10.5px;border-radius:32px;gap:1px}
@@ -817,9 +821,9 @@ i[data-lucide],svg.lucide{width:1.15em;height:1.15em;stroke-width:2.1;flex-shrin
     else {
       manual += seg([["both", "เข้า + เลิกงานแล้ว"], ["start", "รู้แค่เวลาเข้า (ยังทำงาน)"]], k ? "both" : "start", "set-manual-mode", "mode", "sm") +
         '<p class="hint">' + (k ? "ใช้ตอนที่เข้างานและเลิกงานไปแล้ว เลือกหลายคนได้ถ้าเข้า–เลิกพร้อมกัน" : "ใช้ตอนที่เข้างานไปแล้วแต่ยังไม่เลิก ระบบจะเริ่มนับเวลาต่อให้ทันทีและแสดงใน “กำลังทำงาน”") + '</p>' +
-        '<div class="frow" style="margin-bottom:14px"><div class="field" style="flex:1.4 1 150px"><label for="entry-date">วันที่</label><input class="input" type="date" id="entry-date" data-role="m-date" value="' + (state.mDate || todayStr()) + '" /></div>' +
+        '<div class="frow mrow" style="margin-bottom:14px"><div class="field" style="flex:1.4 1 150px"><label for="entry-date">วันที่</label><input class="input" type="date" id="entry-date" data-role="m-date" value="' + (state.mDate || todayStr()) + '" /></div>' +
         '<div class="field" style="flex:1 1 100px"><label for="entry-in">เวลาเข้า</label><input class="input num" type="time" id="entry-in" data-role="m-in" lang="th" step="60" value="' + state.mIn + '" /></div>' +
-        (k ? '<div class="field" style="flex:1 1 100px"><label for="entry-out">เวลาเลิก</label><input class="input num" type="time" id="entry-out" data-role="m-out" lang="th" step="60" value="' + state.mOut + '" /></div>' : '') + '</div>';
+        (k ? '<div class="field full" style="flex:1 1 100px"><label for="entry-out">เวลาเลิก</label><input class="input num" type="time" id="entry-out" data-role="m-out" lang="th" step="60" value="' + state.mOut + '" /></div>' : '') + '</div>';
       var pool = k ? state.employees : getClockableEmployees(), sel = k ? state.manualBothEmpIds : state.manualStartEmpIds;
       if (!pool.length) manual += '<div class="hint" style="margin:0">ทุกคนกำลังทำงานอยู่แล้ว</div>';
       else manual += '<span class="lbl">เลือกพนักงาน (เลือกได้หลายคน)</span>' + chipsHtml(pool, sel, k ? "toggle-manual-both-emp" : "toggle-manual-start-emp") +
